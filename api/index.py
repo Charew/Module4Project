@@ -1,33 +1,46 @@
-# CNIT-381 Fa2023
-# Brennan Kocovsky // Alec Pennings
-
 import requests
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# Main function to contact API and return JSON
-def ip_collector():
-    url = "http://ip-api.com/json/"
-
-    try:
-        apiReturn = requests.get(url) # Define variable as the return of our API URL into the function
-        ip_info = apiReturn.json() # Raw JSON of the IP info returned
-
-        # If successful, start parsing raw JSON into human readable format
-        if ip_info["status"] == "success":
-            print("Public IP Address Information:")
-            print(f"IP Address: {ip_info['query']}")
-            print(f"City: {ip_info['city']}")
-            print(f"Region: {ip_info['regionName']}")
-            print(f"Country: {ip_info['country']}")
-            print(f"ISP: {ip_info['isp']}")
-
-        # If unsuccessful, print error message
+class IPCollectorHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == "/":
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            ip_info = self.get_public_ip_info()
+            self.wfile.write(ip_info.encode())
         else:
-            print("Failed to retrieve IP information.")
+            self.send_response(404)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write("Not Found".encode())
 
-    # Except statement to print failure if overall "try" fails
-    except requests.exceptions.RequestException as fail:
-        print(f"Error: {fail}")
+    def get_public_ip_info(self):
+        url = "http://ip-api.com/json/"
 
-# High-level function call for overall script
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            ip_info = response.json()
+
+            if ip_info["status"] == "success":
+                result = "Public IP Address Information:\n"
+                result += f"IP Address: {ip_info['query']}\n"
+                result += f"City: {ip_info['city']}\n"
+                result += f"Region: {ip_info['regionName']}\n"
+                result += f"Country: {ip_info['country']}\n"
+                result += f"ISP: {ip_info['isp']}"
+                return result
+            else:
+                return "Failed to retrieve IP information."
+
+        except requests.exceptions.RequestException as e:
+            return f"Error: {e}"
+
+def run_vercel_server():
+    server_address = ("0.0.0.0", 3000)
+    httpd = HTTPServer(server_address, IPCollectorHandler)
+    httpd.serve_forever()
+
 if __name__ == "__main__":
-    ip_collector()
+    run_vercel_server()
