@@ -24,6 +24,7 @@ Here's how we fixed them:
 # DIFFERENT IP ADDRESS
 The reason the IP address is different running on Vercel vs locally is that Vercel is running the code on their server, which has a different public IP.
 
-# VERCEL URL
+# VERCEL URLs
 https://vercel.com/charlie-florences-projects/module4-project
+
 https://module4-project-gamma.vercel.app/
