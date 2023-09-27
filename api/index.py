@@ -1,7 +1,7 @@
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-class IPCollectorHandler(BaseHTTPRequestHandler):
+class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
             self.send_response(200)
