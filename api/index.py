@@ -8,7 +8,8 @@ class handler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/plain")
             self.end_headers()
             ip_info = self.get_public_ip_info()
-            self.wfile.write(ip_info.encode())
+            response = self.create_box(ip_info)
+            self.wfile.write(response.encode())
         else:
             self.send_response(404)
             self.send_header("Content-type", "text/plain")
@@ -36,6 +37,15 @@ class handler(BaseHTTPRequestHandler):
 
         except requests.exceptions.RequestException as e:
             return f"Error: {e}"
+
+    def create_box(self, text):
+        lines = text.split('\n')
+        max_len = max(len(line) for line in lines)
+        box = f'╔{"═" * (max_len + 2)}╗\n'
+        for line in lines:
+            box += f'║ {line:{max_len}} ║\n'
+        box += f'╚{"═" * (max_len + 2)}╝'
+        return box
 
 def run_vercel_server():
     server_address = ("0.0.0.0", 3000)
