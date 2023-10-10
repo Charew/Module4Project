@@ -1,5 +1,6 @@
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -8,14 +9,9 @@ class handler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/plain")
             self.end_headers()
             ip_info = self.get_public_ip_info()
-            response = self.create_box(ip_info)
+            json_info = self.get_public_ip_info_json()
+            response = self.create_box(ip_info) + "\n\nRaw JSON:\n" + json_info
             self.wfile.write(response.encode())
-        elif self.path == "/json":
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            ip_info = self.get_public_ip_info()
-            self.wfile.write(ip_info.encode())
         else:
             self.send_response(404)
             self.send_header("Content-type", "text/plain")
@@ -43,6 +39,22 @@ class handler(BaseHTTPRequestHandler):
 
         except requests.exceptions.RequestException as e:
             return f"Error: {e}"
+
+    def get_public_ip_info_json(self):
+        url = "http://ip-api.com/json/"
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            ip_info = response.json()
+
+            if ip_info["status"] == "success":
+                return json.dumps(ip_info, indent=2)
+            else:
+                return json.dumps({"error": "Failed to retrieve IP information."}, indent=2)
+
+        except requests.exceptions.RequestException as e:
+            return json.dumps({"error": f"Error: {e}"}, indent=2)
 
     def create_box(self, text):
         lines = text.split('\n')
