@@ -41,10 +41,10 @@ class handler(BaseHTTPRequestHandler):
     def create_box(self, text):
         lines = text.split('\n')
         max_len = max(len(line) for line in lines)
-        box = f'╔{"═" * (max_len + 2)}╗\n'
+        box = f'/' * (max_len + 4) + '\n'
         for line in lines:
-            box += f'║ {line:{max_len}} ║\n'
-        box += f'╚{"═" * (max_len + 2)}╝'
+            box += f'// {line} //\n'
+        box += f'/' * (max_len + 4)
         return box
 
 def run_vercel_server():
