@@ -10,6 +10,12 @@ class handler(BaseHTTPRequestHandler):
             ip_info = self.get_public_ip_info()
             response = self.create_box(ip_info)
             self.wfile.write(response.encode())
+        elif self.path == "/json":
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            ip_info = self.get_public_ip_info()
+            self.wfile.write(ip_info.encode())
         else:
             self.send_response(404)
             self.send_header("Content-type", "text/plain")
